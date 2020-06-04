@@ -1,0 +1,26 @@
+--------------------
+--------------------
+Limitations of Instant Clones
+The instant clone feature provides good performance and scalability, but it has a few limitations:
+
+¦
+The instant clone feature is not available when you connect directly to ESXi. Instant clone depends on functionality available only in vCenter Server.
+
+¦
+Delta disks created during the instant clone operation are not visible in the snapshot trees of the virtual machines. They cannot be managed with the VirtualMachineSnapshot managed object. Instead, you must manage the delta disks using the VirtualMachine.Reconfigure() method.
+
+¦
+The instant clone operation is partly parallel and partly serialized. You can start several operations concurrently, but part of the process is exclusive and requires serialization of requests.
+
+¦
+The instant clone operation responds to errors by backing out changes, such as delta disks, to restore the previous state of the file system and the source virtual machine. However, there is a small window of failure at the end of the operation where the cloned virtual machine is independent and cannot be backed out to recover from an error. This is a low risk situation.
+
+¦
+Instant clones create a delta disk for both the source and generated virtual machine, so resources can run out after vSphere raises a warning. The source virtual machine may be frozen to avoid excess growth. For current limits and ways to deal with failures, see the KB article Instant Clone fails due to exceeding maximum number of delta disks.
+
+
+
+--------------------
+--------------------
+Converting Instant Clone to Full Clone
+Simliar to a Linked Clone, customers can also take an Instant Clone and then convert that to a Full Clone using the PromoteDisks_Task() vSphere API and ensure you set the unlink property to True. Unlike a Linked Clone, which can be converted while the VM is powered on, for a Instant Clone, you must first power it off before calling the API. I know this is something Engineering is considering for future to support online full clone conversion.
